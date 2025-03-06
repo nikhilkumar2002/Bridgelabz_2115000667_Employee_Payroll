@@ -2,46 +2,66 @@ package com.example.EmployeePayroll.service;
 
 import com.example.EmployeePayroll.dto.EmployeeDTO;
 import com.example.EmployeePayroll.model.Employee;
-import com.example.EmployeePayroll.repository.EmployeeRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class EmployeeService {
 
-    @Autowired
-    private EmployeeRepository employeeRepository;
+    // In-memory storage for employees (replaces database for now)
+    private final List<Employee> employeeList = new ArrayList<>();
 
+    // AtomicLong for generating unique IDs
+    private final AtomicLong idCounter = new AtomicLong(1);
+
+    // Get all employees from in-memory list
     public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+        return employeeList;
     }
 
+    // Get a single employee by ID from in-memory list
     public Employee getEmployeeById(Long id) {
-        return employeeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Employee not found with ID: " + id));
+        return employeeList.stream()
+                .filter(employee -> employee.getId().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
+    // Add a new employee to in-memory list
     public Employee addEmployee(EmployeeDTO employeeDTO) {
-        Employee employee = new Employee(employeeDTO);
-        return employeeRepository.save(employee);
+        // Create new Employee object with unique ID and data from DTO
+        Employee employee = new Employee(
+                idCounter.getAndIncrement(),       // ID
+                employeeDTO.getName(),             // Name
+                employeeDTO.getSalary(),           // Salary (should be 3rd)
+                employeeDTO.getDepartment(),       // Department (should be 4th)
+                employeeDTO.getGender(),           // Gender (should be 5th)
+                employeeDTO.getStartDate()         // StartDate (should be 6th)
+        );
+
+        employeeList.add(employee);  // Add to in-memory list
+        return employee;
     }
 
+    // Update existing employee in in-memory list
     public Employee updateEmployee(Long id, EmployeeDTO employeeDTO) {
-        if (!employeeRepository.existsById(id)) {
-            throw new NoSuchElementException("Employee not found with ID: " + id);
+        Employee existingEmployee = getEmployeeById(id);
+        if (existingEmployee != null) {
+            // Update fields using data from DTO
+            existingEmployee.setName(employeeDTO.getName());
+            existingEmployee.setGender(employeeDTO.getGender());
+            existingEmployee.setDepartment(employeeDTO.getDepartment());
+            existingEmployee.setSalary(employeeDTO.getSalary());
+            existingEmployee.setStartDate(employeeDTO.getStartDate());
         }
-        Employee employee = new Employee(employeeDTO);
-        employee.setId(id);
-        return employeeRepository.save(employee);
+        return existingEmployee;  // Return updated employee
     }
 
+    // Delete an employee by ID from in-memory list
     public void deleteEmployee(Long id) {
-        if (!employeeRepository.existsById(id)) {
-            throw new NoSuchElementException("Employee not found with ID: " + id);
-        }
-        employeeRepository.deleteById(id);
+        employeeList.removeIf(employee -> employee.getId().equals(id));
     }
 }

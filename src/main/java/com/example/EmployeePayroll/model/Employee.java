@@ -2,15 +2,15 @@ package com.example.EmployeePayroll.model;
 
 import com.example.EmployeePayroll.dto.EmployeeDTO;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Data
 @Table(name = "employee")
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
