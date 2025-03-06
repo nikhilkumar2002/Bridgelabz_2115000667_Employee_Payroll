@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EmployeeDTO {
     private String name;
-    private String gender;
-    private String department;
     private double salary;
-    private String startDate;
+    private String department;
+    private String gender;       // Added gender
+    private String startDate;    // Added startDate
 }
